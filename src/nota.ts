@@ -5,19 +5,14 @@
 type Colores = 'Rojo' | 'Verde' | 'Azul' | 'Amarillo';
 
 export class Nota {
+  usuario: string;
   titulo: string;
   cuerpo: string;
   color: Colores;
-  constructor(title: string, body: string, color: Colores) {
+  constructor(user: string, title: string, body: string, color: Colores) {
+    this.usuario = user;
     this.titulo = title;
     this.cuerpo = body;
     this.color = color;
-  }
-}
-
-export class ListaNotas {
-  arrayNotas: Nota[] = [];
-  constructor(notas: Nota[]) {
-    this.arrayNotas = notas;
   }
 }
