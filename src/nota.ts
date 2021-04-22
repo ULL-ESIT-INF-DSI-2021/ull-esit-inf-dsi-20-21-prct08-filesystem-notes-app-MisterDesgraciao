@@ -2,7 +2,7 @@
 
 // import { title } from "node:process";
 
-type Colores = 'Rojo' | 'Verde' | 'Azul' | 'Amarillo';
+export type Colores = 'Rojo' | 'Verde' | 'Azul' | 'Amarillo';
 
 export class Nota {
   usuario: string;
