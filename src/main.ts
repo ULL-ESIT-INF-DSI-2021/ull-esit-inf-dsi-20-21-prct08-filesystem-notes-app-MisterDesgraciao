@@ -5,7 +5,7 @@ import * as chalk from 'chalk';
 import * as fs from 'fs';
 import * as yargs from 'yargs';
 
-const NotaDSI = new Nota('Óscar Pozo', 'DSI',
+const NotaDSI = new Nota('oscarpozo', 'DSI',
     'Llevo bien la asignatura', 'Azul');
 
 const NotasPC = new ListaNotas([NotaDSI]);
@@ -53,15 +53,25 @@ yargs.command({
             argv.usuario, argv.titulo, argv.cuerpo, argv.color);
         NotasPC.addNota(nuevaNota);
 
+        if (!fs.existsSync(`./users`)) {
+          console.log(chalk.red.inverse('No existe la carpeta users.'));
+          console.log(chalk.green.inverse('Creando la carpeta users.'));
+          fs.mkdirSync(`./users`);
+        }
         if (!fs.existsSync(`./users/${argv.usuario}`)) {
-          console.log(chalk.red.inverse('No existe la carpeta.'));
-          console.log(chalk.green.inverse('Creando la carpeta.'));
+          console.log(chalk.red.inverse(
+              `No existe la carpeta ${argv.usuario}.`));
+          console.log(chalk.green.inverse(
+              `Creando la carpeta ${argv.usuario}.`));
           fs.mkdirSync(`./users/${argv.usuario}`);
         }
         if (fs.existsSync(`./users/${argv.usuario}/${argv.titulo}`)) {
           console.log(chalk.red.inverse('ERROR. El título ya existe.'));
         } else {
-          // codigo para crear la nota en un fichero JSON
+          // Transformamos los datos a formato JSON.
+          const datos = JSON.stringify(nuevaNota);
+          // eslint-disable-next-line max-len
+          fs.writeFileSync(`./users/${argv.usuario}/${argv.titulo}.json`, datos);
           console.log(chalk.green('Añadimos la nota.'));
         }
       }
