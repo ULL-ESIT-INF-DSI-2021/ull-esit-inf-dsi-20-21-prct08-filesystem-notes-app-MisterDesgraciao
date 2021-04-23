@@ -1,22 +1,27 @@
-// import {ListaNotasPrinter} from './listanotasprinter';
-// import {ListaNotas} from './listanotas';
 import {Nota} from './nota';
 import * as chalk from 'chalk';
 import * as fs from 'fs';
 import * as yargs from 'yargs';
-// import { readFile } from 'typedoc/dist/lib/utils';
-// import { readFileSync } from 'node:fs';
 
-// const NotaDSI = new Nota('oscarpozo', 'DSI',
-//  'Llevo bien la asignatura', 'Azul');
-
-// const NotasPC = new ListaNotas([NotaDSI]);
-// const Printer = new ListaNotasPrinter(NotasPC);
-
-// Printer.readNota(NotaDSI.titulo);
 console.log(chalk.green('Comienza la ejecución!'));
-// yargs.parse();
 
+/**
+ * Comando 'add' que permite a un usuario añadir una nueva Nota.
+ * Requiere obligatoriamente los parámetros de: 'usuario', 'titulo',
+ * 'cuerpo' y 'color'.
+ *
+ * Primero comprueba que esos 4 argumentos son de tipo string.
+ * Después comprueba que el color es uno de los
+ * 4 soportados (rojo, azul, verde y amarillo).
+ *
+ * Si la carpeta 'users' no existe, la crea en el punto actual.
+ * Si la carpeta del 'usuario' no existe dentro de 'users',
+ * también la crea.
+ *
+ * A continuación, comprueba que ningún otro archivo tenga el mismo Titulo.
+ * Si hay alguno que sí, comunica el error.
+ * En caso contrario, crea el fichero JSON con los datos otorgados.
+ */
 yargs.command({
   command: 'add',
   describe: 'Añadir una Nota nueva',
@@ -84,8 +89,28 @@ yargs.command({
     }
   },
 });
-//    .parse();
 
+/**
+ * Comando 'modify' que permite al usuario modificar una Nota.
+ *
+ * Como parámetro obligatorio debe recibir el título de la Nota,
+ * para saber qué nota es, y además puede recibir el nuevo cuerpo y/o
+ * color de la Nota.
+ *
+ * Como no sabemos de qué usuario es la Nota, primero leemos los nombres
+ * de todas las carpetas dentro de 'users'. Cada carpeta pertenece a un usuario
+ * distinto. Por cada carpeta, leemos el contenido dentro de cada una:
+ * los archivos JSON. Si el nombre de este coincide con el título, entonces
+ * hemos encontrado el archivo a modificar.
+ *
+ * Leemos los 4 parámetros escritos en el JSON (usuario, título, cuerpo y color)
+ * y cambiamos cuerpo y/o color por su nuevo valor.
+ * Tenemos el nuevo objeto a introducir.
+ *
+ * A continuación, borramos el fichero JSON con los datos antiguos. Creamos un
+ * nuevo objeto Nota con los nuevos valores y creamos un nuevo fichero JSON
+ * con esos nuevos datos.
+ */
 yargs.command({
   command: 'modify',
   describe: 'Modificar una nota existente.',
@@ -149,8 +174,19 @@ yargs.command({
     }
   },
 });
-//    .parse();
 
+/**
+ * Comando 'delete' que permite al usuario eliminar una Nota.
+ *
+ * Como parámetro obligatorio solo recibe el título,
+ * para saber que nota eliminar.
+ *
+ * Comenzamos la búsqueda leyendo el contenido de la carpeta 'users'.
+ * Por cada carpeta dentro, leemos el contenido de cada una.
+ * Por cada fichero JSON dentro, comparamos el nombre con el título.
+ *
+ * Cuando coincida uno eliminamos el archivo.
+ */
 yargs.command({
   command: 'delete',
   describe: 'Eliminar una nota existente.',
@@ -190,8 +226,16 @@ yargs.command({
     }
   },
 });
-//   .parse();
 
+/**
+ * Comando 'list' que muestra todos los Títulos de todas las Notas.
+ *
+ * No recibe ningún parámetro al ejecutarse.
+ *
+ * Al igual que los comandos anteriores, inspecciones 'users' para obtener
+ * los nombres de las carpetas. Después inspecciona esas carpetas una por una,
+ * imprimiendo el título de cada archivo JSON que se encuentra.
+ */
 yargs.command({
   command: 'list',
   describe: 'Listar todos los títulos de todas las notas.',
@@ -211,9 +255,20 @@ yargs.command({
     });
   },
 });
-//    .parse();
 
-
+/**
+ * Comando 'read' que permite leer el contenido de una Nota con el color
+ * especificado.
+ *
+ * Como único parámetro debe recibir el título de la nota, para localizarla.
+ *
+ * Obtiene el contenido de la carpeta 'users' para obtener el nombre de las
+ * carpetas de usuarios. Por cada una de ellas, vuelve a leer el contenido,
+ * esta vez para obtener el título de cada fichero JSON.
+ *
+ * Una vez encuentra el fichero, procede a imprimir el título y el cuerpo
+ * de la Nota con el color que tiene indicado.
+ */
 yargs.command({
   command: 'read',
   describe: 'Leer una nota en concreto.',
