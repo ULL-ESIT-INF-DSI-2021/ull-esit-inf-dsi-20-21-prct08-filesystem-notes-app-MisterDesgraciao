@@ -15,7 +15,14 @@ export class ListaNotasPrinter {
     });
   }
 
-  readNota(notaLeer: Nota) {
+  readNota(titulo: string) {
+    // Datos de ejemplo para definir valores y que el compilador no se queje.
+    let notaLeer = new Nota('oscar', 'hola', 'mundo', 'Rojo');
+    this.listaNotas.arrayNotas.forEach((element) => {
+      if (element.titulo.search(titulo) > -1) {
+        notaLeer = element;
+      }
+    });
     const posicion = this.listaNotas.findNotaPosition(notaLeer);
     if (posicion > -1) {
       const color = this.listaNotas.arrayNotas[posicion].color;
