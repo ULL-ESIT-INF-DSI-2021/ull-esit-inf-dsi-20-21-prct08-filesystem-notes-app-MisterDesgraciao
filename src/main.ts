@@ -4,6 +4,8 @@ import {Nota} from './nota';
 import * as chalk from 'chalk';
 import * as fs from 'fs';
 import * as yargs from 'yargs';
+// import { readFile } from 'typedoc/dist/lib/utils';
+// import { readFileSync } from 'node:fs';
 
 // const NotaDSI = new Nota('oscarpozo', 'DSI',
 //  'Llevo bien la asignatura', 'Azul');
@@ -51,7 +53,7 @@ yargs.command({
           argv.color === 'Amarillo') {
         const nuevaNota = new Nota(
             argv.usuario, argv.titulo, argv.cuerpo, argv.color);
-        // NotasPC.addNota(nuevaNota);
+
         // si no existe alguna la carpeta, se crea.
         if (!fs.existsSync(`./users`)) {
           console.log(chalk.red.inverse('No existe la carpeta users.'));
@@ -81,8 +83,8 @@ yargs.command({
       console.log(chalk.red.inverse('Falta algún dato al comando.'));
     }
   },
-})
-    .parse();
+});
+//    .parse();
 
 yargs.command({
   command: 'modify',
@@ -155,11 +157,6 @@ yargs.command({
   command: 'delete',
   describe: 'Eliminar una nota existente.',
   builder: {
-    usuario: {
-      describe: 'Usuario',
-      demandOption: true,
-      type: 'string',
-    },
     titulo: {
       describe: 'Título de la nota',
       demandOption: true,
@@ -167,21 +164,31 @@ yargs.command({
     },
   },
   handler(argv) {
-    if (typeof argv.usuario === 'string' &&
-        typeof argv.titulo === 'string') {
-      // const nuevaNota = new Nota(
-      //    argv.usuario, argv.titulo, argv.cuerpo, argv.color);
-      // NotasPC.deleteNota(nuevaNota);
-      if (!fs.existsSync(`./users/${argv.usuario}`)) {
-        console.log(chalk.red.inverse('ERROR. No existe la carpeta.'));
-      } else {
-        if (fs.existsSync(`./users/${argv.usuario}/${argv.titulo}.json`)) {
-          console.log(chalk.green('Eliminamos la Nota.'));
-          fs.rmSync(`./users/${argv.usuario}/${argv.titulo}.json`);
-        } else {
-          console.log(chalk.red.inverse('ERROR. La nota no existe.'));
-        }
+    if (typeof argv.titulo === 'string') {
+      const directorios = fs.readdirSync(`./users`);
+      let carpetaUsuario;
+      let datos;
+      let objeto;
+      let borrado: boolean = false;
+      directorios.forEach((carpeta) => {
+        carpetaUsuario = fs.readdirSync(`./users/${carpeta}`);
+        carpetaUsuario.forEach((ficheroJSON) => {
+          datos = fs.readFileSync(`./users/${carpeta}/${ficheroJSON}`);
+          objeto = JSON.parse(datos.toString());
+          if (objeto.titulo === argv.titulo) {
+            fs.rmSync(`./users/${carpeta}/${ficheroJSON}`);
+            console.log(chalk.green.inverse(
+                `Eliminado el fichero ${ficheroJSON}`));
+            borrado = true;
+          }
+        });
+      });
+      if (!borrado) {
+        console.log(chalk.red.inverse(
+            'ERROR. No existe el fichero que se desea borrar'));
       }
+    } else {
+      console.log(chalk.red.inverse('No es el formato esperado de Titulo'));
     }
   },
 });
@@ -225,13 +232,13 @@ yargs.command({
     let dato;
     let objeto;
     let leido: boolean = false;
-    directorios.forEach((usuario) => {
-      carpeta = fs.readdirSync(`./users/${usuario}`);
+    directorios.forEach((carpetaUsuario) => {
+      carpeta = fs.readdirSync(`./users/${carpetaUsuario}`);
       carpeta.forEach((nombreDoc) => {
         if (typeof argv.titulo === 'string' &&
             nombreDoc === argv.titulo + '.json') {
           console.log(chalk.green.inverse('La nota dice:'));
-          dato = fs.readFileSync(`./users/${usuario}/${nombreDoc}`);
+          dato = fs.readFileSync(`./users/${carpetaUsuario}/${nombreDoc}`);
           objeto = JSON.parse(dato.toString());
           const colorNota = objeto.color;
           leido = true;
