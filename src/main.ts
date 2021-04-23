@@ -1,19 +1,19 @@
-import {ListaNotasPrinter} from './listanotasprinter';
-import {ListaNotas} from './listanotas';
+// import {ListaNotasPrinter} from './listanotasprinter';
+// import {ListaNotas} from './listanotas';
 import {Nota} from './nota';
 import * as chalk from 'chalk';
 import * as fs from 'fs';
 import * as yargs from 'yargs';
 
-const NotaDSI = new Nota('oscarpozo', 'DSI',
-    'Llevo bien la asignatura', 'Azul');
+// const NotaDSI = new Nota('oscarpozo', 'DSI',
+//  'Llevo bien la asignatura', 'Azul');
 
-const NotasPC = new ListaNotas([NotaDSI]);
-const Printer = new ListaNotasPrinter(NotasPC);
+// const NotasPC = new ListaNotas([NotaDSI]);
+// const Printer = new ListaNotasPrinter(NotasPC);
 
-Printer.readNota(NotaDSI.titulo);
-
-yargs.parse();
+// Printer.readNota(NotaDSI.titulo);
+console.log(chalk.green('Comienza la ejecución!'));
+// yargs.parse();
 
 yargs.command({
   command: 'add',
@@ -51,8 +51,8 @@ yargs.command({
           argv.color === 'Amarillo') {
         const nuevaNota = new Nota(
             argv.usuario, argv.titulo, argv.cuerpo, argv.color);
-        NotasPC.addNota(nuevaNota);
-
+        // NotasPC.addNota(nuevaNota);
+        // si no existe alguna la carpeta, se crea.
         if (!fs.existsSync(`./users`)) {
           console.log(chalk.red.inverse('No existe la carpeta users.'));
           console.log(chalk.green.inverse('Creando la carpeta users.'));
@@ -72,22 +72,22 @@ yargs.command({
           const datos = JSON.stringify(nuevaNota);
           // eslint-disable-next-line max-len
           fs.writeFileSync(`./users/${argv.usuario}/${argv.titulo}.json`, datos);
-          console.log(chalk.green('Añadimos la nota.'));
+          console.log(chalk.green('Añadimos la Nota.'));
         }
+      } else {
+        console.log(chalk.red.inverse('Color no soportado.'));
       }
+    } else {
+      console.log(chalk.red.inverse('Falta algún dato al comando.'));
     }
   },
-});
+})
+    .parse();
 
 yargs.command({
   command: 'modify',
   describe: 'Modificar una nota existente.',
   builder: {
-    usuario: {
-      describe: 'Usuario',
-      demandOption: true,
-      type: 'string',
-    },
     titulo: {
       describe: 'Título de la nota',
       demandOption: true,
@@ -95,42 +95,61 @@ yargs.command({
     },
     cuerpo: {
       describe: 'Cuerpo de la nota',
-      demandOption: true,
+      demandOption: false,
       type: 'string',
     },
     color: {
       describe: 'Color de la nota',
-      demandOption: true,
+      demandOption: false,
       type: 'string',
     },
   },
   handler(argv) {
-    if (typeof argv.usuario === 'string' &&
-        typeof argv.titulo === 'string' &&
+    if (typeof argv.titulo === 'string' &&
+        (typeof argv.cuerpo === 'string' && argv.cuerpo.length > 0) ||
+        (typeof argv.color === 'string' && argv.color.length > 0)) {
+      if (fs.existsSync(`./users/**/${argv.titulo}.json`)) {
+        console.log(chalk.green('Modificamos la Nota.'));
+        // código para modificar el fichero JSON.
+        console.log(`./users/**/${argv.titulo}.json`);
+        const objetoNota = fs.readFileSync(`./users/**/${argv.titulo}.json`);
+        console.log(objetoNota);
+      } else {
+        console.log(chalk.red.inverse('ERROR. La nota a modificar no existe.'));
+      }
+    } else {
+      // eslint-disable-next-line max-len
+      console.log(chalk.red.inverse('ERROR. Debe introducir un título, un nuevo cuerpo y/o un nuevo color'));
+    }
+    /*
+    if (typeof argv.titulo === 'string' &&
         typeof argv.cuerpo === 'string' &&
         typeof argv.color === 'string') {
       if (argv.color === 'Rojo' ||
           argv.color === 'Verde' ||
           argv.color === 'Azul' ||
           argv.color === 'Amarillo') {
-        const nuevaNota = new Nota(
-            argv.usuario, argv.titulo, argv.cuerpo, argv.color);
-        NotasPC.modifyNota(nuevaNota);
+        // const nuevaNota = new Nota(
+        //    argv.usuario, argv.titulo, argv.cuerpo, argv.color);
+        // NotasPC.modifyNota(nuevaNota);
 
         if (!fs.existsSync(`./users/${argv.usuario}`)) {
           console.log(chalk.red.inverse('ERROR. No existe la carpeta.'));
         } else {
-          if (fs.existsSync(`./users/${argv.usuario}/${argv.titulo}`)) {
+          if (fs.existsSync(`./users/${argv.usuario}/${argv.titulo}.json`)) {
             console.log(chalk.green('Modificamos la Nota.'));
             // código para modificar el fichero JSON.
           } else {
             console.log(chalk.red.inverse('ERROR. La nota no existe.'));
           }
         }
+      } else {
+        console.log(chalk.red.inverse('Falta algún dato al comando.'));
       }
-    }
+    } */
   },
 });
+//    .parse();
 
 yargs.command({
   command: 'delete',
@@ -146,53 +165,48 @@ yargs.command({
       demandOption: true,
       type: 'string',
     },
-    cuerpo: {
-      describe: 'Cuerpo de la nota',
-      demandOption: false,
-      type: 'string',
-    },
-    color: {
-      describe: 'Color de la nota',
-      demandOption: false,
-      type: 'string',
-    },
   },
   handler(argv) {
     if (typeof argv.usuario === 'string' &&
-        typeof argv.titulo === 'string' &&
-        typeof argv.cuerpo === 'string' &&
-        typeof argv.color === 'string') {
-      if (argv.color === 'Rojo' ||
-          argv.color === 'Verde' ||
-          argv.color === 'Azul' ||
-          argv.color === 'Amarillo') {
-        const nuevaNota = new Nota(
-            argv.usuario, argv.titulo, argv.cuerpo, argv.color);
-        NotasPC.deleteNota(nuevaNota);
-        if (!fs.existsSync(`./users/${argv.usuario}`)) {
-          console.log(chalk.red.inverse('ERROR. No existe la carpeta.'));
+        typeof argv.titulo === 'string') {
+      // const nuevaNota = new Nota(
+      //    argv.usuario, argv.titulo, argv.cuerpo, argv.color);
+      // NotasPC.deleteNota(nuevaNota);
+      if (!fs.existsSync(`./users/${argv.usuario}`)) {
+        console.log(chalk.red.inverse('ERROR. No existe la carpeta.'));
+      } else {
+        if (fs.existsSync(`./users/${argv.usuario}/${argv.titulo}.json`)) {
+          console.log(chalk.green('Eliminamos la Nota.'));
+          fs.rmSync(`./users/${argv.usuario}/${argv.titulo}.json`);
         } else {
-          if (fs.existsSync(`./users/${argv.usuario}/${argv.titulo}`)) {
-            console.log(chalk.green('Eliminamos la Nota.'));
-            // código para eliminar el fichero JSON.
-          } else {
-            console.log(chalk.red.inverse('ERROR. La nota no existe.'));
-          }
+          console.log(chalk.red.inverse('ERROR. La nota no existe.'));
         }
       }
     }
   },
 });
+//   .parse();
 
 yargs.command({
   command: 'list',
   describe: 'Listar todos los títulos de todas las notas.',
   handler() {
-    Printer.listAllTitles();
-    // probablemente también haya que añadir código para mostrar los
-    // datos leyendo los títulos de los ficheros JSON.
+    console.log('Los títulos de las Notas son:');
+    const directorios = fs.readdirSync(`./users`);
+    let fichero;
+    let dato;
+    let objeto;
+    directorios.forEach((usuario) => {
+      fichero = fs.readdirSync(`./users/${usuario}`);
+      fichero.forEach((nombreDoc) => {
+        dato = fs.readFileSync(`./users/${usuario}/${nombreDoc}`);
+        objeto = JSON.parse(dato.toString());
+        console.log(chalk.green(objeto.titulo));
+      });
+    });
   },
 });
+//    .parse();
 
 
 yargs.command({
@@ -206,9 +220,48 @@ yargs.command({
     },
   },
   handler(argv) {
-    if (typeof argv.titulo === 'string') {
-      Printer.readNota(argv.titulo);
-      // puede que haga falta código para leer desde fichero JSON
+    const directorios = fs.readdirSync(`./users`);
+    let carpeta;
+    let dato;
+    let objeto;
+    let leido: boolean = false;
+    directorios.forEach((usuario) => {
+      carpeta = fs.readdirSync(`./users/${usuario}`);
+      carpeta.forEach((nombreDoc) => {
+        if (typeof argv.titulo === 'string' &&
+            nombreDoc === argv.titulo + '.json') {
+          console.log(chalk.green.inverse('La nota dice:'));
+          dato = fs.readFileSync(`./users/${usuario}/${nombreDoc}`);
+          objeto = JSON.parse(dato.toString());
+          const colorNota = objeto.color;
+          leido = true;
+          switch (colorNota) {
+            case 'Rojo':
+              console.log(chalk.red(objeto.titulo + '.json'));
+              console.log(chalk.red(objeto.cuerpo));
+              break;
+            case 'Verde':
+              console.log(chalk.green(objeto.titulo + '.json'));
+              console.log(chalk.green(objeto.cuerpo));
+              break;
+            case 'Azul':
+              console.log(chalk.blue(objeto.titulo + '.json'));
+              console.log(chalk.blue(objeto.cuerpo));
+              break;
+            case 'Amarillo':
+              console.log(chalk.yellow(objeto.titulo + '.json'));
+              console.log(chalk.yellow(objeto.cuerpo));
+              break;
+            default:
+              break;
+          }
+        }
+      });
+    });
+    if (!leido) {
+      console.log(chalk.red.inverse(
+          'No se encontró ninguna nota con ese título'));
     }
   },
-});
+})
+    .parse();

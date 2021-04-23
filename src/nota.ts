@@ -15,4 +15,12 @@ export class Nota {
     this.cuerpo = body;
     this.color = color;
   }
+
+  setCuerpo(nuevoCuerpo: string) {
+    this.cuerpo = nuevoCuerpo;
+  }
+
+  setColor(nuevoColor: Colores) {
+    this.color = nuevoColor;
+  }
 }

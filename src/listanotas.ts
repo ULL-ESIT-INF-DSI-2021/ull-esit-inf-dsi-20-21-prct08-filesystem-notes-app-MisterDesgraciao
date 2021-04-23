@@ -15,7 +15,7 @@ export class ListaNotas {
   comprobarTitulo(nuevaNota: Nota): boolean {
     this.arrayNotas.forEach((element) => {
       if (element.titulo === nuevaNota.titulo) {
-        console.log(chalk.green.inverse(
+        console.log(chalk.green(
             'Se ha encontrado una nota con el título.'));
         return true;
       }
