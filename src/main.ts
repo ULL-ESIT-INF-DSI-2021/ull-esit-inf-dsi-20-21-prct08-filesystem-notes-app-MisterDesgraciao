@@ -110,45 +110,43 @@ yargs.command({
     if (typeof argv.titulo === 'string' &&
         (typeof argv.cuerpo === 'string' && argv.cuerpo.length > 0) ||
         (typeof argv.color === 'string' && argv.color.length > 0)) {
-      if (fs.existsSync(`./users/**/${argv.titulo}.json`)) {
-        console.log(chalk.green('Modificamos la Nota.'));
-        // código para modificar el fichero JSON.
-        console.log(`./users/**/${argv.titulo}.json`);
-        const objetoNota = fs.readFileSync(`./users/**/${argv.titulo}.json`);
-        console.log(objetoNota);
-      } else {
+      const directorios = fs.readdirSync(`./users`);
+      let carpetaUsuario;
+      let datos;
+      let objeto;
+      let modificado: boolean = false;
+      directorios.forEach((carpeta) => {
+        carpetaUsuario = fs.readdirSync(`./users/${carpeta}`);
+        carpetaUsuario.forEach((ficheroJSON) => {
+          datos = fs.readFileSync(`./users/${carpeta}/${ficheroJSON}`);
+          objeto = JSON.parse(datos.toString());
+          if (objeto.titulo === argv.titulo) {
+            console.log(chalk.green.inverse('Modificamos el fichero.'));
+            if (typeof argv.cuerpo === 'string' && argv.cuerpo.length > 0) {
+              objeto.cuerpo = argv.cuerpo;
+              console.log(chalk.green('Cambiamos el cuerpo de la Nota.'));
+            }
+            if (typeof argv.color === 'string' && argv.color.length > 0) {
+              objeto.color = argv.color;
+              console.log(chalk.green('Cambiamos el color de la Nota.'));
+            }
+            fs.rmSync(`./users/${carpeta}/${ficheroJSON}`);
+            const nuevaNota = new Nota(
+                objeto.usuario, objeto.titulo, objeto.cuerpo, objeto.color);
+            const datosEscribir = JSON.stringify(nuevaNota);
+            fs.writeFileSync(
+                `./users/${carpeta}/${ficheroJSON}`, datosEscribir);
+            modificado = true;
+          }
+        });
+      });
+      if (!modificado) {
         console.log(chalk.red.inverse('ERROR. La nota a modificar no existe.'));
       }
     } else {
       // eslint-disable-next-line max-len
       console.log(chalk.red.inverse('ERROR. Debe introducir un título, un nuevo cuerpo y/o un nuevo color'));
     }
-    /*
-    if (typeof argv.titulo === 'string' &&
-        typeof argv.cuerpo === 'string' &&
-        typeof argv.color === 'string') {
-      if (argv.color === 'Rojo' ||
-          argv.color === 'Verde' ||
-          argv.color === 'Azul' ||
-          argv.color === 'Amarillo') {
-        // const nuevaNota = new Nota(
-        //    argv.usuario, argv.titulo, argv.cuerpo, argv.color);
-        // NotasPC.modifyNota(nuevaNota);
-
-        if (!fs.existsSync(`./users/${argv.usuario}`)) {
-          console.log(chalk.red.inverse('ERROR. No existe la carpeta.'));
-        } else {
-          if (fs.existsSync(`./users/${argv.usuario}/${argv.titulo}.json`)) {
-            console.log(chalk.green('Modificamos la Nota.'));
-            // código para modificar el fichero JSON.
-          } else {
-            console.log(chalk.red.inverse('ERROR. La nota no existe.'));
-          }
-        }
-      } else {
-        console.log(chalk.red.inverse('Falta algún dato al comando.'));
-      }
-    } */
   },
 });
 //    .parse();
