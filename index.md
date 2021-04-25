@@ -325,73 +325,252 @@ Por último, comentar que existe un *booleano* `modificado` que simplemente comp
 
 ##### Comando delete
 
+Para el comando `delete`, lo único que necesitamos para poder borrar una nota es su título. 
 
 ```typescript
-
+yargs.command({
+  command: 'delete',
+  describe: 'Eliminar una nota existente.',
+  builder: {
+    titulo: {
+      describe: 'Título de la nota',
+      demandOption: true,
+      type: 'string',
+    },
+  },
+  /**
+   * Continúa...
+   */
 ```
 
-```typescript
+Para la parte del `handler` primero comprobamos que el `titulo` es de tipo *string*. Después declaramos unas variables y guardamos en `directorios` lo que haya dentro de la carpeta **./user** usando `fs.readdirSync()`.
 
-```
+Iteramos sobre capa carpeta y hacemos lo mismo sobre cada archivo de cada carpeta. (Mismo procedimiento que en `modify` para encontrar la nota). Cuando encontremos una coincidencia, simplemente borramos el fichero con `fs.rmSync()`.
 
-```typescript
-
-```
+Informamos por consola si se pudo borrar la nota deseada, si no existe o si el `titulo` viene en un formato no soportado.
 
 ```typescript
-
-```
-
-```typescript
-
+  /**
+   * ...anterior.
+   */
+  handler(argv) {
+    if (typeof argv.titulo === 'string') {
+      const directorios = fs.readdirSync(`./users`);
+      let carpetaUsuario;
+      let datos;
+      let objeto;
+      let borrado: boolean = false;
+      directorios.forEach((carpeta) => {
+        carpetaUsuario = fs.readdirSync(`./users/${carpeta}`);
+        carpetaUsuario.forEach((ficheroJSON) => {
+          datos = fs.readFileSync(`./users/${carpeta}/${ficheroJSON}`);
+          objeto = JSON.parse(datos.toString());
+          if (objeto.titulo === argv.titulo) {
+            fs.rmSync(`./users/${carpeta}/${ficheroJSON}`);
+            console.log(chalk.green.inverse(
+                `Eliminado el fichero ${ficheroJSON}`));
+            borrado = true;
+          }
+        });
+      });
+      if (!borrado) {
+        console.log(chalk.red.inverse(
+            'ERROR. No existe el fichero que se desea borrar'));
+      }
+    } else {
+      console.log(chalk.red.inverse('No es el formato esperado de Titulo'));
+    }
+  },
+});
 ```
 
 ##### Comando list
 
-```typescript
-
-```
+El comando `list`, pues usa el mismo procedimiento que los comandos `modify` y `delete` para encontrar la nota: itera sobre las carpetas de dentro de **./users**, y por cada carpeta también itera sobre el contenido de dentro (los ficheros JSON) de cada una. En este caso, simplemente restaura el objeto `Nota` de cada fichero e imprime el `titulo`.
 
 ```typescript
-
-```
-
-```typescript
-
-```
-
-```typescript
-
-```
-
-```typescript
-
+yargs.command({
+  command: 'list',
+  describe: 'Listar todos los títulos de todas las notas.',
+  handler() {
+    console.log('Los títulos de las Notas son:');
+    const directorios = fs.readdirSync(`./users`);
+    let fichero;
+    let dato;
+    let objeto;
+    directorios.forEach((usuario) => {
+      fichero = fs.readdirSync(`./users/${usuario}`);
+      fichero.forEach((nombreDoc) => {
+        dato = fs.readFileSync(`./users/${usuario}/${nombreDoc}`);
+        objeto = JSON.parse(dato.toString());
+        console.log(chalk.green(objeto.titulo));
+      });
+    });
+  },
+});
 ```
 
 ##### Comando read
 
-```typescript
+Para el último comando: `read`, también solo necesitamos el `titulo` de la nota para funcionar.
 
+```typescript
+yargs.command({
+  command: 'read',
+  describe: 'Leer una nota en concreto.',
+  builder: {
+    titulo: {
+      describe: 'Título de la nota',
+      demandOption: true,
+      type: 'string',
+    },
+  },
+  /**
+   * Continúa...
+   */
 ```
 
-```typescript
+Llegando al `handler` hacemos primero lo de siempre: leemos **./users** e iteramos sobre su contenido. Ese contenido son las carpetas de usuarios, de las que leemos su contenido e iteramos sobre ello. Entonces vamos comparando que la `Nota` a buscar coincida con alguno de todos los ficheros JSON creado.
 
+Cuando tengamos una coincidencia, leemos los archivos del fichero y los reconvertimos a un objeto `Nota`. De este objeto obtenemos el `colorNota`.
+
+```typescript
+  /**
+   * ...
+   */
+  handler(argv) {
+    const directorios = fs.readdirSync(`./users`);
+    let carpeta;
+    let dato;
+    let objeto;
+    let leido: boolean = false;
+    directorios.forEach((carpetaUsuario) => {
+      carpeta = fs.readdirSync(`./users/${carpetaUsuario}`);
+      carpeta.forEach((nombreDoc) => {
+        if (typeof argv.titulo === 'string' &&
+            nombreDoc === argv.titulo + '.json') {
+          console.log(chalk.green.inverse('La nota dice:'));
+          dato = fs.readFileSync(`./users/${carpetaUsuario}/${nombreDoc}`);
+          objeto = JSON.parse(dato.toString());
+          const colorNota = objeto.color;
+          leido = true;
+          /**
+           * continúa...
+           */
 ```
 
-```typescript
+Este `switch` recibe el argumento `colorNota`, que es el color con el que imprimir la nota. En un principio intenté ejecutar `chalk.colorNota()`, intentando que de alguna manera pudiera usar el contenido de la variable como opción, pero no fue posible.
 
+Al final, este `switch` funciona perfectamente y ha sido la mejor solución.
+
+```typescript
+          /**
+           * ...
+           */
+          switch (colorNota) {
+            case 'Rojo':
+              console.log(chalk.red(objeto.titulo + '.json'));
+              console.log(chalk.red(objeto.cuerpo));
+              break;
+            case 'Verde':
+              console.log(chalk.green(objeto.titulo + '.json'));
+              console.log(chalk.green(objeto.cuerpo));
+              break;
+            case 'Azul':
+              console.log(chalk.blue(objeto.titulo + '.json'));
+              console.log(chalk.blue(objeto.cuerpo));
+              break;
+            case 'Amarillo':
+              console.log(chalk.yellow(objeto.titulo + '.json'));
+              console.log(chalk.yellow(objeto.cuerpo));
+              break;
+            default:
+              break;
+          }
+        }
+      });
+    });
+    if (!leido) {
+      console.log(chalk.red.inverse(
+          'No se encontró ninguna nota con ese título'));
+    }
+  },
+})
+    .parse();
 ```
 
-```typescript
+Comentar que para hacer funcionar todo esto, no me sirvió la línea `yargs.parse()` que se comenta en el guión de la práctica. Lo que sí funcionaba era poner el `.parse()` al final de algunas declaraciones de los comandos, pero probando me di cuenta que cada declaración de `.parse()` que se haga después del comando implica que, al ejecutar el comando, lo hará el número de veces de `.parse()`.
 
+Esto supuso el problema que ejecutaba el comando veces de más; y si después del comando no había ningún `.parse()`, entonces no hacía nada el comando.
+
+La solución fue color el `.parse()` al final del todo del fichero (el último comando), para que solo ejecutase una vez.
+
+##### Pruebas
+
+Al principio me surgieron bastantes dudas sobre cómo podría realizar las pruebas de sobre el main. No sabía como plantear esto, pues el programa no realiza cambios sobre variables o estructuras de datos de dentro del programa, si no de fuera. La respuesta me vino a través de un compañero, que me dijo que en tutoría le habían comentado que este fichero, efectivamente, tendría pocas pruebas por la imposibilidad de realizarlas sobre los comandos.
+
+Después de pensar un poco, decidí que las pruebas se realicen al final de una ejecución práctica de ejemplo, que modificase la carpeta **./users** para poder buscar valores esperados dentro de ella.
+
+Así pues, los tests consisten en comprobar que las carpetas creadas en la ejecución práctica siguen existiendo: a través del `to.exists` y el `not.null`. Además, aprovechar el comando `fs.readdirSync()` para comprobar la cantidad de carpetas dentro de **./users**.
+
+```typescript
+import 'mocha';
+import {expect} from 'chai';
+import * as fs from 'fs';
+
+describe('Comprobar que los datos existen después de ejecutar.', () => {
+  it('Existe el fichero ./users', () => {
+    expect('./users').to.exist;
+    expect('./users').not.null;
+  });
+  it('Dentro de ./users hay solo dos carpetas', () => {
+    expect(fs.readdirSync('./users').length).to.eql(2);
+  });
+  it('Existe la carpeta de oscar', () => {
+    expect('./users/oscar').to.exist;
+    expect('./users/oscar').not.null;
+  });
+  /**
+   * Continúa...
+   */
 ```
 
-```typescript
+En esta continuación, también compruebo como antes que existe el fichero `Viernes.json`. Sin embargo, traté de hacer un par de comprobaciones diferentes:
 
+Comprobar que no existen ni la carpeta `vin diesel` en ./users, ni el fichero `Cangrejo.json` en ninguna carpeta. Para ello, aplico el mismo método que en los comandos: iterar sobre los contenido de cada carpeta, esta vez buscando que **ningún contenido coincida con lo puntuado**.
+
+De esta manera, intento darle un poco más de fiabilidad al programa.
+
+```typescript
+  /**
+   * ...
+   */
+  it('Existe la carpeta de bugs bunny', () => {
+    expect('./users/bugs bunny').to.exist;
+    expect('./users/bugs bunny').not.null;
+  });
+  it('NO existe la carpeta de Vin Diesel', () => {
+    const carpetasUsuario = fs.readdirSync('./users');
+    carpetasUsuario.forEach((element) => {
+      expect(element).to.not.eql('vin diesel');
+    });
+  });
+  it('Existe el fichero Viernes.json en la carpeta ./users/oscar', () => {
+    expect('./users/oscar/Viernes.json').to.exist;
+    expect('./users/oscar/Viernes.json').not.null;
+  });
+  it('NO existe el fichero Cangrejo.json en ninguna carpeta', () => {
+    const carpetasUsuario = fs.readdirSync('./users');
+    carpetasUsuario.forEach((carpeta) => {
+      const ficherosCarpeta = fs.readdirSync(`./users/${carpeta}`);
+      ficherosCarpeta.forEach((archivo) => {
+        expect(`./users/${carpeta}/${archivo}`).to.not.eql('Cangrejo.json');
+      });
+    });
+  });
+});
 ```
 
 #### Dificultades
 
-```typescript
-
-```
+Por último, resumir y anotar las dificultades que he tenido en esta práctica:
