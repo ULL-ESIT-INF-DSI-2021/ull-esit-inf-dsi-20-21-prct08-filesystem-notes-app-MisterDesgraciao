@@ -10,7 +10,7 @@
     "test": "mocha",
     "coverage": "nyc npm test",
     "start": "tsc-watch --onSuccess \"node dist/main.js\"",
-    "doc": "typedoc"
+    "doc": "typedoc; touch ./docs/.nojekyll"
   },
   "keywords": [],
   "author": "",
