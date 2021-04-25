@@ -220,11 +220,175 @@ Por último, hace uso de `fs.writeFileSync()` para indicar la dirección y el no
 
 ##### Comando modify
 
+Para el comando `modifiy` mi planteamiento es: hay que incluir obligatoriamente el `título` de la nota, además del `cuerpo` **y/o** `color` a cambiar. Es decir, puedes cambiar el cuerpo, el color o los dos.
+
+Para hacer esto hay que especificar `titulo` como obligatorio, pero `cuerpo` y `color` como opcionales.
+
+```typescript
+yargs.command({
+  command: 'modify',
+  describe: 'Modificar una nota existente.',
+  builder: {
+    titulo: {
+      describe: 'Título de la nota',
+      demandOption: true,
+      type: 'string',
+    },
+    cuerpo: {
+      describe: 'Cuerpo de la nota',
+      demandOption: false,
+      type: 'string',
+    },
+    color: {
+      describe: 'Color de la nota',
+      demandOption: false,
+      type: 'string',
+    },
+  },
+  /**
+   * handler...
+   */
+```
+
+Lo primero que hacemos al entrar al `handler` es comprobar que `titulo` es del formato `string`, y que luego tienen existir `cuerpo` y/o `color`. Esto lo hacemos comprobando que la longitud de la variable sea mayor que cero. Y por último, si el tamaño se cumple, comprobamos que el dato introducido también es de formato `string`.
+
+A continuación, creamos unas cuantas variables que nos servirán más adelante.
+
+Después lo que hacemos es almacenar el contenido de la carpeta **./users** en una variable. Lo que pretendo es iterar sobre esa variable con un `forEach()`, lo cual me permite acceder de manera dinámica a cada **carpeta de usuario**.
+
+Así pues, recibo el nombre de cada una de las carpetas de usuarios y repito la misma operación: almacenar lo que haya dentro de cada en la variable `carpetaUsuario` haciendo uso del `fs.readdirSync()`.
+
+```typescript
+  /**
+   * parte anterior
+   */
+  handler(argv) {
+      if (typeof argv.titulo === 'string' &&
+          (typeof argv.cuerpo === 'string' && argv.cuerpo.length > 0) ||
+          (typeof argv.color === 'string' && argv.color.length > 0)) {
+        let carpetaUsuario;
+        let datos;
+        let objeto;
+        let modificado: boolean = false;
+        const directorios = fs.readdirSync(`./users`);
+        directorios.forEach((carpeta) => {
+          carpetaUsuario = fs.readdirSync(`./users/${carpeta}`);
+          /**
+          * parte siguiente
+          */
+```
+
+Al iterar sobre el contenido de `carpetaUsuario`, lo que estoy haciendo es conseguir el nombre de todos los `ficheroJSON` de cada usuario. Y obtengo los datos usando `fs.readFileSync()` sobre la ruta absoluta del fichero.
+
+Es importante tratar esos datos que hemos leído del `ficheroJSON`, pues están en un formato poco legible. Es por eso que transformo esos datos en un objeto `Nota` con `JSON.parse(datos.toString())`. Ahora `objeto` tiene los datos en un formato reconocible.
+
+Es en este punto en el que compruebo que el título del archivo leído y el de la variable introducida coinciden. En tal caso, primero se imprimen por consola los mensajes correspondientes.
+
+Mi manera de realizar esta modificación del contenido es eliminar el archivo y volverlo a crear. Para ello, creo un nuevo objeto `nuevaNota` con los datos de `objeto`. Elimino el fichero JSON. Transformo a formato JSON con `JSON.stringify(nuevaNota)` sobre la variable `datosEscribir`, y esto se lo paso a `fs.writeFileSync()`.
+
+Por último, comentar que existe un *booleano* `modificado` que simplemente comprueba si se pudo modificar la nota, es decir, si se encontró la nota durante el periodo de búsqueda.
+
+```typescript
+          carpetaUsuario.forEach((ficheroJSON) => {
+          datos = fs.readFileSync(`./users/${carpeta}/${ficheroJSON}`);
+          objeto = JSON.parse(datos.toString());
+          if (objeto.titulo === argv.titulo) {
+            console.log(chalk.green.inverse('Modificamos el fichero.'));
+            if (typeof argv.cuerpo === 'string' && argv.cuerpo.length > 0) {
+              objeto.cuerpo = argv.cuerpo;
+              console.log(chalk.green('Cambiamos el cuerpo de la Nota.'));
+            }
+            if (typeof argv.color === 'string' && argv.color.length > 0) {
+              objeto.color = argv.color;
+              console.log(chalk.green('Cambiamos el color de la Nota.'));
+            }
+            fs.rmSync(`./users/${carpeta}/${ficheroJSON}`);
+            const nuevaNota = new Nota(
+                objeto.usuario, objeto.titulo, objeto.cuerpo, objeto.color);
+            const datosEscribir = JSON.stringify(nuevaNota);
+            fs.writeFileSync(
+                `./users/${carpeta}/${ficheroJSON}`, datosEscribir);
+            modificado = true;
+          }
+        });
+      });
+      if (!modificado) {
+        console.log(chalk.red.inverse('ERROR. La nota a modificar no existe.'));
+      }
+    } else {
+      // eslint-disable-next-line max-len
+      console.log(chalk.red.inverse('ERROR. Debe introducir un título, un nuevo cuerpo y/o un nuevo color'));
+    }
+  },
+});
+```
+
 ##### Comando delete
+
+
+```typescript
+
+```
+
+```typescript
+
+```
+
+```typescript
+
+```
+
+```typescript
+
+```
+
+```typescript
+
+```
 
 ##### Comando list
 
+```typescript
+
+```
+
+```typescript
+
+```
+
+```typescript
+
+```
+
+```typescript
+
+```
+
+```typescript
+
+```
+
 ##### Comando read
+
+```typescript
+
+```
+
+```typescript
+
+```
+
+```typescript
+
+```
+
+```typescript
+
+```
+
+```typescript
+
+```
 
 #### Dificultades
 
