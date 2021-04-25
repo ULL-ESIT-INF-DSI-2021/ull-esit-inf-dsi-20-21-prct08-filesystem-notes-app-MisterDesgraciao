@@ -574,3 +574,17 @@ De esta manera, intento darle un poco más de fiabilidad al programa.
 #### Dificultades
 
 Por último, resumir y anotar las dificultades que he tenido en esta práctica:
+- Cambiar el planteamiento de la práctica. Pasar de centrarme únicamente en objetos y variables a procesar ficheros.
+- Hacer funcionar el módulo `yargs`, pues el `handler` es más restrictivo que una función cualquiera y no permite todas sus opciones.
+- Hacer funcionar el procesado de comandos con `yargs.parse()`. Sin la sentencia no funciona ningún comando y si se declara varias veces, vuelve a ejecutar el comando ese número de veces.
+- Poder iterar de manera dinámica sobre los ficheros. Es decir, no depender de que el cliente introduzca su usuario en todos los comandos que podrían funcionar usando solo el título. Es uso de `fs.readdirSync()` es exclusivamente para esto.
+- Aprender a transformar los datos entre JSON y datos más legibles (como una clase), y así poder leer y escribir sobre ficheros JSON. Todo esto a través del paquete `JSON.<función>()`.
+- Realizar los tests sobre un programa que no interactúa sobre clases y variables, si no sobre ficheros; lo cual es más obtuso y creo que no es para lo que está planteado `mocha`.
+
+### Conclusión
+
+Tras realizar esta práctica he conseguido cambiar el chip y darme cuenta que Typescript (y, por ende, Javascript) son lenguajes que también pueden trabajar sobre elementos más comunes de una terminal.
+
+Trabajar sobre el sistema de ficheros en sí no es tan complicado una vez superas la primer barrera, además de que la página de Node.js es muy completa. Los ficheros JSON están bastante bien organizados, en mi opinión.
+
+El paquete chalk es un paquete **muy sencillo** y súper útil para darle un poco más de vida a la terminal. Esperaba algo un poco complicado pero ha resultado ser una adición muy intuitiva.
