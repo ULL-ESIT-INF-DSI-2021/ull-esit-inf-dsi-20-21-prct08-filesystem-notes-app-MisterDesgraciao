@@ -30,6 +30,26 @@ export class Nota {
   }
 
   /**
+   * Función que devuelve el nombre de usuario.
+   * @returns Nombre de usuario.
+   */
+  getUsuario(): string {
+    return this.usuario;
+  }
+
+  getTitulo(): string {
+    return this.titulo;
+  }
+
+  getCuerpo(): string {
+    return this.cuerpo;
+  }
+
+  getColor(): Colores {
+    return this.color;
+  }
+
+  /**
    * Función para cambiar el contenido de cuerpo
    * @param nuevoCuerpo Nuevo valor de cuerpo.
    */
