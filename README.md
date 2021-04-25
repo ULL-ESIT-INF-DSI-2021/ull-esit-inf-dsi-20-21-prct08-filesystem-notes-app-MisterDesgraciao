@@ -1,4 +1,4 @@
-# Desarrollo de Sistemas Informáticos
+# Desarrollo de Sistemas Informáticos.
 ## Universidad de La Laguna. Tercer año.
 ### Práctica 8: Aplicación de procesamiento de notas de texto.
 
